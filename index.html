@@ -13,12 +13,27 @@
     return str;
 
 }
+
+function convertToHex() {
+    var str=document.getElementById("strString").value
+
+    var hex = '';
+    for(var i=0;i<str.length;i++) {
+        hex += ''+str.charCodeAt(i).toString(16);
+    }
+    document.getElementById("encryptedString").innerHTML=hex;
+    return hex;
+}
     </script>
 </head>
 <body>
-    <input type="text" id="hexString"/>
-    <button onClick="hex2a()">Ok</button>
-    <p id="decryptedString"></p>
+        Enter text to encrypt: <input type="text" id="strString"/>
+        <button onClick="convertToHex()">Ok</button>
+        <p id="encryptedString"></p>
+
+        Enter text to decrypt: <input type="text" id="hexString"/>
+        <button onClick="hex2a()">Ok</button>
+        <p id="decryptedString"></p>
 </body>
 
 </html>
