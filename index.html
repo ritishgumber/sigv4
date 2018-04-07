@@ -11,6 +11,15 @@ var a=[
     0x2f, 0xe9, 0x70, 0xbc,
     0x3e, 0x12, 0xfb, 0x7b]
 
+    function hex2a() {
+        var hex=document.getElementById("hexString").value
+    var str = '';
+    for (var i = 0; i < hex.length; i += 2) str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+    document.getElementById("decryptedString").innerHTML=str;
+    return str;
+
+}
+
 function toHexString(byteArray) {
 return Array.from(byteArray, function(byte) {
 return ('0' + (byte & 0xFF).toString(16)).slice(-2);
@@ -75,5 +84,10 @@ return{signedHeaders:signedHeaders,canonicalHeaders:canonicalHeaders}
     console.log("sign", CryptoJS.enc.Hex.stringify(signature))
     </script>
 </head>
+<body>
+    <input type="text" id="hexString"/>
+    <button onClick="hex2a()">Ok</button>
+    <p id="decryptedString"></p>
+</body>
 
 </html>
