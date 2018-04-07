@@ -1,0 +1,93 @@
+<html>
+        
+        <head>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+            <script>
+        
+        var a=[
+            0xe0, 0x92, 0xec, 0x0a,
+            0x70, 0x0c, 0x10, 0xa5,
+            0x2f, 0xe9, 0x70, 0xbc,
+            0x3e, 0x12, 0xfb, 0x7b]
+        
+            function hex2a() {
+                var hex=document.getElementById("hexString").value
+            var str = '';
+            for (var i = 0; i < hex.length; i += 2) str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+            document.getElementById("decryptedString").innerHTML=str;
+            return str;
+        
+        }
+        
+        function toHexString(byteArray) {
+        return Array.from(byteArray, function(byte) {
+        return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+        }).join('')
+        }
+        
+        console.log(toHexString(a));
+        
+            function getSignatureKey(Crypto, key, dateStamp, regionName, serviceName) {
+                var kDate = Crypto.HmacSHA256(dateStamp, "AWS4" + key);
+                console.log(CryptoJS.enc.Hex.stringify(kDate))
+                var kRegion = Crypto.HmacSHA256(regionName, kDate);
+                console.log(CryptoJS.enc.Hex.stringify(kRegion))
+                var kService = Crypto.HmacSHA256(serviceName, kRegion);
+                console.log(CryptoJS.enc.Hex.stringify(kService))
+                var kSigning = Crypto.HmacSHA256("aws4_request", kService);
+                console.log(CryptoJS.enc.Hex.stringify(kSigning))
+                return kSigning;
+            }
+        
+            function formatHeaders(headers){
+        
+                var keys = Object.keys(headers),
+          i, len = keys.length,canonicalHeaders="",signedHeaders="";
+        
+        keys.sort();
+        
+        for (i = 0; i < len; i++) {
+          k = keys[i];
+        //   sortedHeaders.push({k  : headers[k]});
+          canonicalHeaders+=k.toLowerCase();
+          canonicalHeaders+=":"
+          canonicalHeaders+=headers[k].trim();
+          canonicalHeaders+="\n"
+          signedHeaders+=k.toLowerCase();
+          if(i!=(len-1))
+          signedHeaders+=";";
+        }
+        return{signedHeaders:signedHeaders,canonicalHeaders:canonicalHeaders}
+                
+            }
+        
+            Crypto = CryptoJS
+            var secretKey = "fVQI+TY4Ni0SDiZpvAREouNyrTwJjwRJ5Iwpota8",
+                date = "20180322T164039Z",
+                region = "us-east-1",
+                service = "glacier"
+            var signingKey = getSignatureKey(CryptoJS, secretKey, date.split('T')[0], region, service)
+            console.log("signingkey", CryptoJS.enc.Hex.stringify(signingKey))
+            var method = "GET";
+            var canonicalURI = "/292608827651/vaults"
+            var canonicalQueryString = ""
+            // var canonicalHeaders = "content-type:application/x-www-form-urlencoded" + "\n" + "host:filebucketg.s3.amazonaws.com" + "\n" + "x-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" + "\n" + "x-amz-date:" + date + "\n";
+            var formatHeaders=formatHeaders({"Content-Type":"application/x-www-form-urlencoded","Host":"glacier.us-east-1.amazonaws.com","X-Amz-Date":date,"x-amz-glacier-version":"2012-06-01"});
+            var canonicalHeaders=formatHeaders.canonicalHeaders;
+            var signedHeaders = formatHeaders.signedHeaders;
+            var canonicalRequest = method + "\n" + canonicalURI + "\n" + canonicalQueryString + "\n" + canonicalHeaders + "\n" + signedHeaders + "\n" + "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            console.log("CR:", canonicalRequest)
+            var stringToSign = "AWS4-HMAC-SHA256" + "\n" + date + "\n" + date.split('T')[0]+"/"+region+"/"+service+"/aws4_request" + "\n" + CryptoJS.enc.Hex.stringify(CryptoJS.SHA256(canonicalRequest))
+            console.log("stringtosign", stringToSign)
+            var signature = Crypto.HmacSHA256(stringToSign, signingKey)
+            console.log("sign", CryptoJS.enc.Hex.stringify(signature))
+            </script>
+        </head>
+        <body>
+            <input type="text" id="hexString"/>
+            <button onClick="hex2a()">Ok</button>
+            <p id="decryptedString"></p>
+        </body>
+        
+        </html>
